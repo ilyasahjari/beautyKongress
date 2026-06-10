@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#c47080"/>
+<title>BeautyKongress '27</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+<style>
+  :root {
+    --pk:#f9d6df; --pkd:#8a3a4a; --pkm:#c47080; --pkb:#e8b0be; --pkdeep:#5a1a28;
+    --gr:#d6ecd6; --grd:#2a5a2a; --grm:#6a9a6a; --grb:#a8cca8;
+    --bg:#f5eddf; --bgd:#6a4a18; --bgm:#b08848; --bgb:#d4b880;
+    --cr:#fdf8f2; --cr2:#f7f2eb; --cr3:#f0ebe2; --cr4:#e0d8cc;
+    --wh:#ffffff;
+    --t1:#3a2a1a; --t2:#8a7a6a; --t3:#b8a898;
+    --font-head: 'Cormorant Garamond', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --nav-h: 68px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    font-family: var(--font-body);
+    background: #e8e0d8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* ── PHONE SHELL (desktop) ── */
+  .phone-shell {
+    width: 390px;
+    height: 844px;
+    background: var(--cr);
+    border-radius: 50px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 0 0 1px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.3);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Full-screen mobile */
+  @media (max-width: 420px) {
+    body { background: var(--cr); align-items: flex-start; }
+    .phone-shell {
+      width: 100vw; height: 100dvh;
+      border-radius: 0; box-shadow: none;
+    }
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    height: 50px; flex-shrink: 0;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 28px 8px;
+    background: var(--cr);
+    position: relative; z-index: 10;
+  }
+  .status-bar .time { font-size: 15px; font-weight: 600; color: var(--t1); }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons i { font-size: 16px; color: var(--t1); }
+
+  /* ── SCREEN CONTAINER ── */
+  .screen-wrap {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .screen {
+    position: absolute; inset: 0;
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 0 calc(var(--nav-h) + 8px);
+    opacity: 0; pointer-events: none;
+    transform: translateX(20px);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .screen.active {
+    opacity: 1; pointer-events: auto;
+    transform: translateX(0);
+  }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    height: var(--nav-h);
+    flex-shrink: 0;
+    background: var(--wh);
+    border-top: 0.5px solid var(--cr4);
+    display: flex;
+    align-items: center;
+    padding: 0 4px calc(var(--safe-bottom));
+    position: relative; z-index: 20;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    padding: 8px 0;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .nav-item:active { background: var(--cr3); }
+  .nav-item i { font-size: 22px; color: var(--t3); transition: color 0.15s; }
+  .nav-item span { font-size: 10px; color: var(--t3); font-weight: 500; transition: color 0.15s; }
+  .nav-item.active i { color: var(--pkm); }
+  .nav-item.active span { color: var(--pkm); font-weight: 600; }
+  .nav-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--pkm); position: absolute; bottom: 2px;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .nav-item.active .nav-dot { opacity: 1; }
+
+  /* ── SHARED COMPONENTS ── */
+  .page-header {
+    padding: 16px 20px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: var(--cr);
+    z-index: 5; backdrop-filter: blur(10px);
+  }
+  .page-title {
+    font-family: var(--font-head);
+    font-size: 26px; font-weight: 600; color: var(--t1);
+    letter-spacing: -0.3px;
+  }
+  .page-actions { display: flex; gap: 10px; }
+  .icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 10px; background: var(--cr3);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border: none;
+    transition: background 0.15s;
+  }
+  .icon-btn:active { background: var(--cr4); }
+  .icon-btn i { font-size: 18px; color: var(--pkm); }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; color: var(--t2);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 0 20px; margin-bottom: 10px;
+  }
+  .pad { padding: 0 20px; }
+
+  .card {
+    background: var(--wh);
+    border-radius: 16px;
+    border: 0.5px solid var(--cr4);
+    padding: 14px 16px;
+    margin: 0 20px 10px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .card:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .card-pk { background: #fdf0f3; border-color: var(--pkb); }
+  .card-gr { background: #f0f7f0; border-color: var(--grb); }
+  .card-bg { background: #faf5eb; border-color: var(--bgb); }
+
+  .t1 { font-size: 14px; font-weight: 500; color: var(--t1); line-height: 1.4; }
+  .t2 { font-size: 12px; color: var(--t2); }
+  .t3 { font-size: 11px; color: var(--t3); }
+
+  .tag {
+    display: inline-flex; align-items: center;
+    border-radius: 6px; padding: 2px 8px;
+    font-size: 11px; font-weight: 600;
+  }
+  .tag-vortrag { background: var(--gr); color: var(--grd); }
+  .tag-workshop { background: var(--pk); color: var(--pkd); }
+  .tag-pause { background: var(--bg); color: var(--bgd); }
+  .tag-panel { background: #e8e4f5; color: #4a3a7a; }
+
+  .pill-btn {
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; border: none;
+    cursor: pointer; transition: transform 0.1s;
+  }
+  .pill-btn:active { transform: scale(0.96); }
+  .pill-pk { background: var(--pk); color: var(--pkd); }
+  .pill-pkfill { background: var(--pkm); color: var(--wh); }
+  .pill-gr { background: var(--gr); color: var(--grd); }
+  .pill-bg { background: var(--bg); color: var(--bgd); }
+
+  .progress-bar {
+    height: 5px; border-radius: 3px;
+    background: var(--cr4); overflow: hidden;
+  }
+  .progress-fill { height: 100%; border-radius: 3px; }
+  .fill-pk { background: var(--pkm); }
+  .fill-gr { background: var(--grm); }
+  .fill-bg { background: var(--bgm); }
+
+  .avatar {
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; flex-shrink: 0; color: var(--wh);
+    font-family: var(--font-body);
+  }
+
+  .row-item {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--wh); border-radius: 14px;
+    padding: 12px 14px; margin: 0 20px 8px;
+    border: 0.5px solid var(--cr4);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .row-item:active { transform: scale(0.98); }
+
+  /* ── HOME SCREEN ── */
+  .hero-card {
+    margin: 0 20px 14px;
+    background: linear-gradient(135deg, #c47080 0%, #a85868 100%);
+    border-radius: 22px;
+    padding: 20px;
+    color: var(--wh);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute; top: -30px; right: -20px;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  .hero-card::after {
+    content: '';
+    position: absolute; bottom: -20px; right: 30px;
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .hero-name { font-family: var(--font-head); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; margin-bottom: 4px; }
+  .hero-title { font-family: var(--font-head); font-size: 22px; font-weight: 600; margin-bottom: 14px; line-height: 1.2; }
+  .countdown-row { display: flex; gap: 8px; }
+  .count-box { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 8px 10px; text-align: center; min-width: 56px; backdrop-filter: blur(4px); }
+  .count-num { font-size: 22px; font-weight: 700; line-height: 1; }
+  .count-unit { font-size: 9px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  .ticket-strip {
+    margin: 0 20px 14px;
+    background: var(--wh);
+    border: 0.5px solid var(--cr4);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .ticket-strip:active { transform: scale(0.98); }
+  .ticket-icon-wrap {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--bg); display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .ticket-icon-wrap i { font-size: 22px; color: var(--bgm); }
+  .ticket-badge { background: var(--bg); color: var(--bgd); }
+
+  .home-greeting { font-size: 12px; color: var(--t2); }
+  .home-name { font-family: var(--font-head); font-size: 22px; color: var(--t1); font-weight: 600; }
+
+  /* ── PROGRAMM SCREEN ── */
+  .day-seg {
+    display: flex; gap: 6px; margin: 0 20px 16px;
+    background: var(--cr3); border-radius: 12px; padding: 4px;
+  }
+  .day-seg-item {
+    flex: 1; text-align: center;
+    font-size: 12px; font-weight: 500; color: var(--t2);
+    padding: 7px 0; border-radius: 9px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .day-seg-item.active {
+    background: var(--wh); color: var(--t1); font-weight: 600;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .prog-item { display: flex; gap: 12px; padding: 0 20px; margin-bottom: 10px; }
+  .prog-time { width: 44px; font-size: 11px; color: var(--t2); padding-top: 14px; flex-shrink: 0; font-weight: 500; }
+  .prog-card {
+    flex: 1; border-radius: 14px; padding: 12px 14px;
+    border: 0.5px solid var(--cr4);
+    cursor: pointer; transition: transform 0.1s;
+  }
+  .prog-card:active { transform: scale(0.98); }
+  .prog-card-gr { background: var(--cr); border-left: 3px solid var(--grm); }
+  .prog-card-pk { background: var(--cr); border-left: 3px solid var(--pkm); }
+  .prog-card-bg { background: var(--bg); border-left: 3px solid var(--bgm); border-color: var(--bgb); }
+  .prog-card-pl { background: var(--cr); border-left: 3px solid #9a8ab0; }
+  .prog-room { font-size: 11px; color: var(--t2); margin-top: 4px; }
+  .prog-capacity { margin-top: 6px; }
+
+  /* ── HALLE SCREEN ── */
+  .floor-tabs {
+    display: flex; gap: 6px; margin: 0 20px 14px;
+  }
+  .floor-tab {
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    border: 0.5px solid var(--cr4);
+    background: var(--wh); color: var(--t2);
+    transition: all 0.15s;
+  }
+  .floor-tab.active { background: var(--pkm); color: var(--wh); border-color: var(--pkm); }
+  .map-wrap {
+    margin: 0 20px 14px;
+    background: var(--wh);
+    border-radius: 18px;
+    border: 0.5px solid var(--cr4);
+    padding: 12px;
+    overflow: hidden;
+  }
+  .map-legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 0 20px; margin-bottom: 14px; }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--t2); }
+  .leg-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+  /* ── NETZWERK SCREEN ── */
+  .badge-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 0 20px 16px; }
+  .badge-card {
+    background: var(--wh); border-radius: 14px;
+    border: 0.5px solid var(--cr4);
+    padding: 12px 8px; text-align: center;
+    cursor: pointer; transition: transform 0.1s;
+  }
+  .badge-card:active { transform: scale(0.97); }
+  .badge-icon { font-size: 26px; margin-bottom: 4px; }
+  .badge-name { font-size: 11px; font-weight: 600; color: var(--t1); margin-bottom: 6px; }
+  .badge-prog { font-size: 10px; color: var(--t2); margin-top: 4px; }
+
+  .search-bar {
+    margin: 0 20px 14px;
+    background: var(--cr3); border-radius: 12px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px;
+    border: none;
+  }
+  .search-bar i { font-size: 18px; color: var(--t3); flex-shrink: 0; }
+  .search-bar input {
+    background: none; border: none; outline: none;
+    font-family: var(--font-body); font-size: 14px; color: var(--t1);
+    width: 100%;
+  }
+  .search-bar input::placeholder { color: var(--t3); }
+
+  /* ── PROFIL/TICKET SCREEN ── */
+  .profile-hero {
+    margin: 0 20px 14px;
+    background: linear-gradient(135deg, #fdf0f3, #f9d6df);
+    border-radius: 22px;
+    border: 0.5px solid var(--pkb);
+    padding: 20px;
+    text-align: center;
+  }
+  .profile-av {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--pkm); color: var(--wh);
+    font-size: 22px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+    font-family: var(--font-body);
+  }
+  .profile-name { font-family: var(--font-head); font-size: 22px; font-weight: 600; color: var(--pkdeep); }
+  .profile-role { font-size: 12px; color: var(--pkm); margin-bottom: 14px; }
+  .qr-wrap { background: var(--wh); border-radius: 12px; padding: 12px; display: inline-block; margin-bottom: 8px; }
+  .ticket-code { font-size: 11px; color: var(--pkm); letter-spacing: 2px; font-weight: 500; }
+
+  .info-row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--wh); border-radius: 14px;
+    padding: 14px 16px; margin: 0 20px 8px;
+    border: 0.5px solid var(--cr4);
+  }
+  .info-row-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .info-row-icon i { font-size: 18px; }
+
+  /* ── NOTIF SCREEN ── */
+  .notif-item {
+    margin: 0 20px 8px;
+    border-radius: 16px;
+    padding: 14px 16px;
+    border: 0.5px solid var(--cr4);
+    cursor: pointer;
+    transition: transform 0.1s;
+    position: relative;
+  }
+  .notif-item:active { transform: scale(0.98); }
+  .notif-new::after {
+    content: ''; position: absolute; top: 14px; right: 14px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--pkm);
+  }
+  .notif-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+  .notif-title { font-size: 13px; font-weight: 600; }
+  .notif-time { font-size: 11px; color: var(--t3); }
+  .notif-body { font-size: 12px; color: var(--t2); line-height: 1.5; }
+  .notif-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+  /* ── FEEDBACK SCREEN ── */
+  .feedback-section { padding: 0 20px; margin-bottom: 14px; }
+  .feedback-q { font-size: 14px; font-weight: 500; color: var(--t1); margin-bottom: 10px; line-height: 1.5; }
+  .stars-row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .star-btn { font-size: 28px; color: var(--cr4); cursor: pointer; transition: color 0.1s, transform 0.1s; line-height: 1; background: none; border: none; }
+  .star-btn:hover { transform: scale(1.15); }
+  .star-btn.lit { color: #c9a84c; }
+  .scale-hint { display: flex; justify-content: space-between; font-size: 10px; color: var(--t3); }
+
+  /* ── DETAIL OVERLAY ── */
+  .overlay {
+    position: absolute; inset: 0; z-index: 50;
+    background: var(--cr);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow-y: auto;
+    padding-bottom: 20px;
+  }
+  .overlay.open { transform: translateY(0); }
+  .overlay-handle {
+    width: 40px; height: 4px; background: var(--cr4);
+    border-radius: 2px; margin: 12px auto 16px;
+  }
+  .overlay-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 20px 16px;
+  }
+  .back-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--cr3); display: flex; align-items: center;
+    justify-content: center; cursor: pointer; border: none;
+    flex-shrink: 0; transition: background 0.15s;
+  }
+  .back-btn:active { background: var(--cr4); }
+  .back-btn i { font-size: 18px; color: var(--t1); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: absolute; bottom: calc(var(--nav-h) + 16px); left: 20px; right: 20px;
+    background: var(--t1); color: var(--wh);
+    border-radius: 14px; padding: 14px 16px;
+    font-size: 13px; z-index: 100;
+    transform: translateY(20px); opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Scrollbar hide */
+  .screen::-webkit-scrollbar { display: none; }
+  .screen { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body>
+
+<div class="phone-shell">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="time" id="clock">9:41</span>
+    <div class="status-icons">
+      <i class="ti ti-wifi"></i>
+      <i class="ti ti-battery-3"></i>
+    </div>
+  </div>
+
+  <!-- SCREENS -->
+  <div class="screen-wrap">
+
+    <!-- ════════════════ HOME ════════════════ -->
+    <div class="screen active" id="screen-home">
+      <div class="page-header">
+        <div>
+          <div class="home-greeting">Willkommen zurück</div>
+          <div class="home-name">BeautyKongress '27</div>
+        </div>
+        <div class="avatar" style="width:40px;height:40px;background:var(--pkm);font-size:14px;" onclick="goScreen('profil')">SK</div>
+      </div>
+
+      <!-- Hero countdown -->
+      <div class="hero-card">
+        <div class="hero-name">Beautykongress Ulm 2027</div>
+        <div class="hero-title">10. – 12. September<br/>Congress Centrum Ulm</div>
+        <div class="countdown-row">
+          <div class="count-box"><div class="count-num" id="cnt-d">42</div><div class="count-unit">Tage</div></div>
+          <div class="count-box"><div class="count-num" id="cnt-h">08</div><div class="count-unit">Std.</div></div>
+          <div class="count-box"><div class="count-num" id="cnt-m">23</div><div class="count-unit">Min.</div></div>
+          <div class="count-box"><div class="count-num" id="cnt-s">00</div><div class="count-unit">Sek.</div></div>
+        </div>
+      </div>
+
+      <!-- Ticket strip -->
+      <div class="ticket-strip" onclick="goScreen('profil')">
+        <div class="ticket-icon-wrap"><i class="ti ti-qrcode"></i></div>
+        <div style="flex:1;">
+          <div class="t1">Fachbesucher · Early Bird</div>
+          <div class="t2" style="margin-top:2px;">Congress Centrum Ulm · BK27-0482</div>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--t3);"></i>
+      </div>
+
+      <!-- Today -->
+      <div class="section-label" style="margin-top:4px;">Heute empfohlen</div>
+
+      <div class="card" onclick="showDetail('keynote')">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div style="flex:1;">
+            <div class="t2" style="margin-bottom:3px;">10:00 – 10:45 · Saal 1</div>
+            <div class="t1">Keynote: Zukunft der Naturkosmetik</div>
+            <div class="t2" style="margin-top:4px;">Dr. Anna Berger</div>
+          </div>
+          <span class="tag tag-vortrag" style="margin-left:10px;">Keynote</span>
+        </div>
+        <div style="margin-top:8px;display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-bookmark-filled" style="font-size:14px;color:var(--pkm);"></i>
+          <span class="t3">Gespeichert</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="showDetail('workshop')">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div style="flex:1;">
+            <div class="t2" style="margin-bottom:3px;">14:00 – 16:00 · Raum B3</div>
+            <div class="t1">Workshop: Pflanzliche Colorationen</div>
+            <div class="t2" style="margin-top:4px;">Max. 20 Plätze</div>
+          </div>
+          <span class="tag tag-workshop" style="margin-left:10px;">Workshop</span>
+        </div>
+        <div style="margin-top:8px;">
+          <div class="progress-bar" style="margin-bottom:4px;"><div class="progress-fill fill-pk" style="width:85%;"></div></div>
+          <div class="t3"><span style="color:var(--pkm);font-weight:600;">3 Plätze frei</span> · 17/20 belegt</div>
+        </div>
+      </div>
+
+      <div class="card card-gr" onclick="showDetail('party')">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div style="flex:1;">
+            <div class="t2" style="margin-bottom:3px;">18:00 · Foyer</div>
+            <div class="t1">Messeparty & Get-Together</div>
+            <div class="t2" style="margin-top:4px;">Networking · Testbereich offen</div>
+          </div>
+          <span class="tag tag-pause" style="margin-left:10px;">Abend</span>
+        </div>
+      </div>
+
+      <!-- Quick links -->
+      <div class="section-label" style="margin-top:4px;">Schnellzugriff</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 20px 20px;">
+        <div class="card" style="margin:0;padding:14px;" onclick="goScreen('halle')">
+          <i class="ti ti-map-2" style="font-size:22px;color:var(--pkm);margin-bottom:6px;display:block;"></i>
+          <div class="t1" style="font-size:13px;">Hallenplan</div>
+          <div class="t2" style="font-size:11px;">EG · 1. OG · Außen</div>
+        </div>
+        <div class="card" style="margin:0;padding:14px;" onclick="goScreen('netzwerk')">
+          <i class="ti ti-users" style="font-size:22px;color:var(--grm);margin-bottom:6px;display:block;"></i>
+          <div class="t1" style="font-size:13px;">Netzwerk</div>
+          <div class="t2" style="font-size:11px;">3 neue Matches</div>
+        </div>
+        <div class="card" style="margin:0;padding:14px;" onclick="goScreen('notifications')">
+          <i class="ti ti-bell" style="font-size:22px;color:var(--bgm);margin-bottom:6px;display:block;"></i>
+          <div class="t1" style="font-size:13px;">Neuigkeiten</div>
+          <div class="t2" style="font-size:11px;"><span style="color:var(--pkm);">3 ungelesen</span></div>
+        </div>
+        <div class="card" style="margin:0;padding:14px;" onclick="showFeedback()">
+          <i class="ti ti-star" style="font-size:22px;color:#c9a84c;margin-bottom:6px;display:block;"></i>
+          <div class="t1" style="font-size:13px;">Feedback</div>
+          <div class="t2" style="font-size:11px;">Event bewerten</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ PROGRAMM ════════════════ -->
+    <div class="screen" id="screen-programm">
+      <div class="page-header">
+        <div class="page-title">Programm</div>
+        <div class="page-actions">
+          <button class="icon-btn"><i class="ti ti-adjustments-horizontal"></i></button>
+        </div>
+      </div>
+
+      <div class="day-seg" id="day-seg">
+        <div class="day-seg-item active" onclick="setDay(0,this)">Mi 10.9</div>
+        <div class="day-seg-item" onclick="setDay(1,this)">Do 11.9</div>
+        <div class="day-seg-item" onclick="setDay(2,this)">Fr 12.9</div>
+      </div>
+
+      <div id="day-content">
+        <!-- Day 0 -->
+        <div class="day-prog active" id="day-0">
+          <div class="prog-item">
+            <div class="prog-time">10:00</div>
+            <div class="prog-card prog-card-pk" onclick="showDetail('start')">
+              <div class="t1">Startveranstaltung & Eröffnung</div>
+              <div class="prog-room">Saal 1 · Alle Teilnehmenden</div>
+              <div style="margin-top:6px;"><span class="tag tag-vortrag">Eröffnung</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">12:00</div>
+            <div class="prog-card prog-card-bg">
+              <div class="t1">Mittagspause</div>
+              <div class="prog-room">Foyer · Catering</div>
+              <div style="margin-top:6px;"><span class="tag tag-pause">Pause</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">14:00</div>
+            <div class="prog-card prog-card-gr" onclick="showDetail('keynote')">
+              <div class="t1">Keynote: Zukunft der Naturkosmetik</div>
+              <div class="prog-room">Saal 1 · Dr. Anna Berger</div>
+              <div style="margin-top:6px;"><span class="tag tag-vortrag">Keynote</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">16:00</div>
+            <div class="prog-card prog-card-pk" onclick="showDetail('workshop')">
+              <div class="t1">Workshop: Pflanzliche Colorationen</div>
+              <div class="prog-room">Raum B3 · Begrenzte Plätze</div>
+              <div style="margin-top:6px;"><span class="tag tag-workshop">Workshop</span></div>
+              <div class="prog-capacity" style="margin-top:6px;">
+                <div class="progress-bar"><div class="progress-fill fill-pk" style="width:85%;"></div></div>
+                <div class="t3" style="margin-top:3px;color:var(--pkm);">3 Plätze frei</div>
+              </div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">18:00</div>
+            <div class="prog-card prog-card-bg" onclick="showDetail('party')">
+              <div class="t1">Messeparty & Get-Together</div>
+              <div class="prog-room">Foyer · Alle eingeladen</div>
+              <div style="margin-top:6px;"><span class="tag tag-pause">Abend</span></div>
+            </div>
+          </div>
+          <div style="height:10px;"></div>
+        </div>
+        <!-- Day 1 -->
+        <div class="day-prog" id="day-1" style="display:none;">
+          <div class="prog-item">
+            <div class="prog-time">09:00</div>
+            <div class="prog-card prog-card-gr">
+              <div class="t1">Vortrag: Wirkstoffe der Natur</div>
+              <div class="prog-room">Saal 1 · Prof. L. Müller</div>
+              <div style="margin-top:6px;"><span class="tag tag-vortrag">Vortrag</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">10:30</div>
+            <div class="prog-card prog-card-bg">
+              <div class="t1">Kaffeepause & Testbereich</div>
+              <div class="prog-room">Lounge</div>
+              <div style="margin-top:6px;"><span class="tag tag-pause">Pause</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">11:00</div>
+            <div class="prog-card prog-card-pk" onclick="showDetail('scalp')">
+              <div class="t1">Workshop: Scalp Care – Diagnose & Pflege</div>
+              <div class="prog-room">Raum C2 · M. Schäfer <span style="color:var(--pkm);">· Mein Plan ✓</span></div>
+              <div style="margin-top:6px;"><span class="tag tag-workshop">Workshop</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">13:00</div>
+            <div class="prog-card prog-card-bg">
+              <div class="t1">Mittagspause · Messebereich</div>
+              <div class="prog-room">Foyer</div>
+              <div style="margin-top:6px;"><span class="tag tag-pause">Pause</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">14:30</div>
+            <div class="prog-card prog-card-gr">
+              <div class="t1">Vortrag: Haargesundheit neu gedacht</div>
+              <div class="prog-room">Saal 2 · Dr. K. Bauer</div>
+              <div style="margin-top:6px;"><span class="tag tag-vortrag">Vortrag</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">16:00</div>
+            <div class="prog-card prog-card-pl">
+              <div class="t1">Panel-Diskussion: Zukunft Naturkosmetik</div>
+              <div class="prog-room">Saal 1 · Alle Referenten</div>
+              <div style="margin-top:6px;"><span class="tag tag-panel">Panel</span></div>
+            </div>
+          </div>
+          <div style="height:10px;"></div>
+        </div>
+        <!-- Day 2 -->
+        <div class="day-prog" id="day-2" style="display:none;">
+          <div class="prog-item">
+            <div class="prog-time">09:00</div>
+            <div class="prog-card prog-card-gr">
+              <div class="t1">Seminar: Naturkosmetik-Zertifizierung</div>
+              <div class="prog-room">Saal 2 · Dr. Weiß</div>
+              <div style="margin-top:6px;"><span class="tag tag-vortrag">Seminar</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">11:00</div>
+            <div class="prog-card prog-card-pk">
+              <div class="t1">Workshop: Nachhaltige Salonführung</div>
+              <div class="prog-room">Raum B1</div>
+              <div style="margin-top:6px;"><span class="tag tag-workshop">Workshop</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">14:00</div>
+            <div class="prog-card prog-card-gr">
+              <div class="t1">Fachvortrag: Innovation & Forschung 2028</div>
+              <div class="prog-room">Saal 1</div>
+              <div style="margin-top:6px;"><span class="tag tag-vortrag">Vortrag</span></div>
+            </div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-time">16:00</div>
+            <div class="prog-card prog-card-pk">
+              <div class="t1">Zertifikatsübergabe & Abschluss</div>
+              <div class="prog-room">Saal 1 · Alle Teilnehmenden</div>
+              <div style="margin-top:6px;"><span class="tag tag-panel">Abschluss</span></div>
+            </div>
+          </div>
+          <div style="height:10px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ HALLE ════════════════ -->
+    <div class="screen" id="screen-halle">
+      <div class="page-header">
+        <div class="page-title">Hallenplan</div>
+        <div class="page-actions">
+          <button class="icon-btn"><i class="ti ti-current-location"></i></button>
+          <button class="icon-btn"><i class="ti ti-search"></i></button>
+        </div>
+      </div>
+
+      <div class="floor-tabs">
+        <div class="floor-tab active" onclick="setFloor(this)">EG</div>
+        <div class="floor-tab" onclick="setFloor(this)">1. OG</div>
+        <div class="floor-tab" onclick="setFloor(this)">Außen</div>
+      </div>
+
+      <div class="map-wrap">
+        <svg viewBox="0 0 340 280" width="100%" style="display:block;">
+          <rect x="8" y="8" width="324" height="264" rx="12" fill="#fdf8f2" stroke="#e0d8cc" stroke-width="1"/>
+          <!-- Saal 1 -->
+          <rect x="18" y="18" width="120" height="86" rx="8" fill="#f0f7f0" stroke="#a8cca8" stroke-width="1"/>
+          <text x="78" y="56" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" fill="#2a5a2a" font-weight="600">Saal 1</text>
+          <text x="78" y="74" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#6a9a6a">Keynotes</text>
+          <!-- Saal 2 -->
+          <rect x="148" y="18" width="100" height="86" rx="8" fill="#f0f7f0" stroke="#a8cca8" stroke-width="1"/>
+          <text x="198" y="56" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" fill="#2a5a2a" font-weight="600">Saal 2</text>
+          <text x="198" y="74" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#6a9a6a">Vorträge</text>
+          <!-- WS Räume -->
+          <rect x="258" y="18" width="64" height="40" rx="8" fill="#fdf0f3" stroke="#e8b0be" stroke-width="1"/>
+          <text x="290" y="42" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#8a3a4a" font-weight="600">WS B1</text>
+          <rect x="258" y="64" width="64" height="40" rx="8" fill="#fdf0f3" stroke="#e8b0be" stroke-width="1"/>
+          <text x="290" y="88" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#8a3a4a" font-weight="600">WS B2</text>
+          <!-- Messebereich -->
+          <rect x="18" y="114" width="256" height="84" rx="8" fill="#fff" stroke="#d4b880" stroke-width="1" stroke-dasharray="5,3"/>
+          <text x="146" y="150" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" fill="#6a4a18" font-weight="600">Messebereich</text>
+          <text x="146" y="168" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#9a8878">Aussteller · Teststände</text>
+          <!-- Stands -->
+          <rect x="28" y="182" width="30" height="14" rx="3" fill="#f0f7f0" stroke="#a8cca8" stroke-width="0.5"/>
+          <text x="43" y="191" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#2a5a2a">A1</text>
+          <rect x="64" y="182" width="30" height="14" rx="3" fill="#f0f7f0" stroke="#a8cca8" stroke-width="0.5"/>
+          <text x="79" y="191" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#2a5a2a">A2</text>
+          <rect x="100" y="182" width="30" height="14" rx="3" fill="#fdf0f3" stroke="#e8b0be" stroke-width="0.5"/>
+          <text x="115" y="191" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#8a3a4a">B1</text>
+          <rect x="136" y="182" width="30" height="14" rx="3" fill="#fdf0f3" stroke="#e8b0be" stroke-width="0.5"/>
+          <text x="151" y="191" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#8a3a4a">B2</text>
+          <!-- Lounge -->
+          <rect x="18" y="208" width="100" height="28" rx="6" fill="#fdf0f3" stroke="#e8b0be" stroke-width="0.5"/>
+          <text x="68" y="224" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#8a3a4a" font-weight="600">Lounge & Schminken</text>
+          <!-- Service -->
+          <rect x="124" y="208" width="64" height="28" rx="6" fill="#fff" stroke="#d4b880" stroke-width="0.5"/>
+          <text x="156" y="220" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a4a18" font-weight="600">Service</text>
+          <text x="156" y="231" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#9a8878">Info · WC</text>
+          <!-- Ruheraum -->
+          <rect x="194" y="208" width="80" height="28" rx="6" fill="#fff" stroke="#d4b880" stroke-width="0.5"/>
+          <text x="234" y="220" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a4a18" font-weight="600">Ruheraum</text>
+          <text x="234" y="231" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#9a8878">Rückzug</text>
+          <!-- Foyer -->
+          <rect x="18" y="246" width="306" height="18" rx="6" fill="#faf5eb" stroke="#d4b880" stroke-width="0.5"/>
+          <text x="171" y="257" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a4a18" font-weight="600">Foyer · Eingang · Registrierung · Garderobe</text>
+          <!-- You are here -->
+          <circle cx="78" cy="61" r="10" fill="#c47080" opacity="0.2"/>
+          <circle cx="78" cy="61" r="6" fill="#c47080"/>
+          <circle cx="78" cy="61" r="3" fill="white"/>
+        </svg>
+      </div>
+
+      <div class="map-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#f0f7f0;border:1px solid #a8cca8;"></div>Vorträge</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#fdf0f3;border:1px solid #e8b0be;"></div>Workshop</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#fdf0f3;border:1px solid #e8b0be;width:12px;height:12px;border-radius:50%;"></div>Standort</div>
+      </div>
+
+      <div class="section-label">Aussteller in der Nähe</div>
+
+      <div class="row-item" onclick="toast('BioNatura Stand A1 — 20 Meter entfernt')">
+        <div class="avatar" style="width:40px;height:40px;background:var(--gr);font-size:12px;color:var(--grd);">BN</div>
+        <div style="flex:1;">
+          <div class="t1">BioNatura GmbH</div>
+          <div class="t2">Stand A1 · Naturkosmetik</div>
+        </div>
+        <i class="ti ti-navigation" style="font-size:18px;color:var(--grm);"></i>
+      </div>
+      <div class="row-item" onclick="toast('ColorEco Stand B1 — 35 Meter entfernt')">
+        <div class="avatar" style="width:40px;height:40px;background:var(--pk);font-size:12px;color:var(--pkd);">CE</div>
+        <div style="flex:1;">
+          <div class="t1">ColorEco</div>
+          <div class="t2">Stand B1 · Pflanzliche Farben</div>
+        </div>
+        <i class="ti ti-navigation" style="font-size:18px;color:var(--pkm);"></i>
+      </div>
+      <div style="height:10px;"></div>
+    </div>
+
+    <!-- ════════════════ NETZWERK ════════════════ -->
+    <div class="screen" id="screen-netzwerk">
+      <div class="page-header">
+        <div class="page-title">Netzwerk</div>
+        <div class="page-actions">
+          <button class="icon-btn" onclick="toast('QR-Code Scanner geöffnet')"><i class="ti ti-qrcode"></i></button>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Teilnehmer suchen…" oninput="filterContacts(this.value)"/>
+      </div>
+
+      <div class="section-label">Meine Abzeichen</div>
+      <div class="badge-grid">
+        <div class="badge-card" onclick="toast('Explorer: Besuche 5 Aussteller-Stände')">
+          <div class="badge-icon">🌿</div>
+          <div class="badge-name">Explorer</div>
+          <div class="progress-bar"><div class="progress-fill fill-gr" style="width:60%;"></div></div>
+          <div class="badge-prog">3 / 5 Stände</div>
+        </div>
+        <div class="badge-card" onclick="toast('Netzwerker: Verbinde dich mit 10 Personen')">
+          <div class="badge-icon">🤝</div>
+          <div class="badge-name">Netzwerker</div>
+          <div class="progress-bar"><div class="progress-fill fill-pk" style="width:30%;"></div></div>
+          <div class="badge-prog">3 / 10</div>
+        </div>
+        <div class="badge-card" onclick="toast('Wissenspionier: Besuche 3 Vorträge')">
+          <div class="badge-icon">🎓</div>
+          <div class="badge-name">Pionier</div>
+          <div class="progress-bar"><div class="progress-fill fill-bg" style="width:66%;"></div></div>
+          <div class="badge-prog">2 / 3</div>
+        </div>
+      </div>
+
+      <div class="section-label">Empfohlene Matches</div>
+      <div id="contacts-list">
+        <div class="row-item" onclick="toast('Kontaktanfrage an Lisa Hartmann gesendet ✓')">
+          <div class="avatar" style="width:44px;height:44px;background:var(--pkm);font-size:14px;">LH</div>
+          <div style="flex:1;">
+            <div class="t1">Lisa Hartmann</div>
+            <div class="t2">Salon Natura · Stuttgart</div>
+          </div>
+          <button class="pill-btn pill-pk" style="font-size:11px;padding:5px 10px;">+ Verbinden</button>
+        </div>
+        <div class="row-item" onclick="toast('Kontaktanfrage an Marc Klein gesendet ✓')">
+          <div class="avatar" style="width:44px;height:44px;background:var(--grm);font-size:14px;">MK</div>
+          <div style="flex:1;">
+            <div class="t1">Marc Klein</div>
+            <div class="t2">BioColor GmbH · München</div>
+          </div>
+          <button class="pill-btn pill-pk" style="font-size:11px;padding:5px 10px;">+ Verbinden</button>
+        </div>
+        <div class="row-item" onclick="toast('Kontaktanfrage an Anna Vogt gesendet ✓')">
+          <div class="avatar" style="width:44px;height:44px;background:var(--bgm);font-size:14px;">AV</div>
+          <div style="flex:1;">
+            <div class="t1">Anna Vogt</div>
+            <div class="t2">@naturhaar_anna · Influencer</div>
+          </div>
+          <button class="pill-btn pill-pk" style="font-size:11px;padding:5px 10px;">+ Verbinden</button>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:6px;">Meine Kontakte</div>
+      <div class="row-item" onclick="toast('Chat mit Jana Roth geöffnet')">
+        <div class="avatar" style="width:44px;height:44px;background:#8a6a9a;font-size:14px;">JR</div>
+        <div style="flex:1;">
+          <div class="t1">Jana Roth</div>
+          <div class="t2">Naturkosmetik Magazin · Presse</div>
+        </div>
+        <i class="ti ti-message-circle" style="font-size:20px;color:var(--pkm);"></i>
+      </div>
+      <div style="height:10px;"></div>
+    </div>
+
+    <!-- ════════════════ PROFIL ════════════════ -->
+    <div class="screen" id="screen-profil">
+      <div class="page-header">
+        <div class="page-title">Profil</div>
+        <div class="page-actions">
+          <button class="icon-btn"><i class="ti ti-settings"></i></button>
+        </div>
+      </div>
+
+      <!-- Profile hero with QR -->
+      <div class="profile-hero">
+        <div class="profile-av">SK</div>
+        <div class="profile-name">Sarah Klein</div>
+        <div class="profile-role">Salon Natura · Stuttgart</div>
+        <div class="qr-wrap">
+          <svg width="100" height="100" viewBox="0 0 64 64">
+            <rect width="64" height="64" fill="white"/>
+            <g fill="#5a1a28">
+              <rect x="4" y="4" width="18" height="18"/><rect x="6" y="6" width="14" height="14" fill="white"/><rect x="8" y="8" width="10" height="10"/>
+              <rect x="42" y="4" width="18" height="18"/><rect x="44" y="6" width="14" height="14" fill="white"/><rect x="46" y="8" width="10" height="10"/>
+              <rect x="4" y="42" width="18" height="18"/><rect x="6" y="44" width="14" height="14" fill="white"/><rect x="8" y="46" width="10" height="10"/>
+              <rect x="26" y="4" width="4" height="4"/><rect x="32" y="4" width="4" height="4"/>
+              <rect x="26" y="10" width="4" height="4"/><rect x="32" y="16" width="4" height="4"/>
+              <rect x="4" y="26" width="4" height="4"/><rect x="10" y="26" width="4" height="4"/>
+              <rect x="26" y="26" width="4" height="4"/><rect x="36" y="26" width="4" height="4"/>
+              <rect x="42" y="26" width="4" height="4"/><rect x="54" y="26" width="4" height="4"/>
+              <rect x="26" y="32" width="4" height="4"/><rect x="48" y="32" width="4" height="4"/>
+              <rect x="26" y="38" width="4" height="4"/><rect x="36" y="38" width="4" height="4"/>
+              <rect x="42" y="42" width="4" height="4"/><rect x="54" y="42" width="4" height="4"/>
+              <rect x="42" y="54" width="4" height="4"/><rect x="48" y="48" width="4" height="4"/><rect x="54" y="54" width="4" height="4"/>
+            </g>
+          </svg>
+        </div>
+        <div class="ticket-code">BK27-0482-FACH</div>
+      </div>
+
+      <!-- Ticket info -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 20px 10px;">
+        <div style="background:#f0f7f0;border-radius:14px;padding:14px;border:0.5px solid #a8cca8;">
+          <div class="t3" style="color:var(--grm);">Einlass</div>
+          <div class="t1" style="color:var(--grd);margin-top:2px;">10. Sept.</div>
+          <div class="t2" style="color:var(--grm);">ab 08:30 Uhr</div>
+        </div>
+        <div style="background:#faf5eb;border-radius:14px;padding:14px;border:0.5px solid #d4b880;">
+          <div class="t3" style="color:var(--bgm);">Zugang</div>
+          <div class="t1" style="color:var(--bgd);margin-top:2px;">Alle 3 Tage</div>
+          <div class="t2" style="color:var(--bgm);">+ Abendprogramm</div>
+        </div>
+      </div>
+
+      <!-- Info rows -->
+      <div class="info-row">
+        <div class="info-row-icon" style="background:#faf5eb;"><i class="ti ti-hotel-service" style="color:var(--bgm);font-size:20px;"></i></div>
+        <div style="flex:1;">
+          <div class="t1" style="color:var(--bgd);">Maritim Hotel gebucht</div>
+          <div class="t2">Zimmer 312 · Check-in 10.9.</div>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--t3);"></i>
+      </div>
+      <div class="info-row" onclick="toast('Shuttle: Hotel → Kongress · 08:15, 08:45, 09:15 Uhr')">
+        <div class="info-row-icon" style="background:#f0f7f0;"><i class="ti ti-bus" style="color:var(--grm);font-size:20px;"></i></div>
+        <div style="flex:1;">
+          <div class="t1">Shuttleservice</div>
+          <div class="t2">Hotel → Kongress · 08:15 Uhr</div>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--t3);"></i>
+      </div>
+      <div class="info-row" onclick="showFeedback()">
+        <div class="info-row-icon" style="background:#fffbf0;"><i class="ti ti-star" style="color:#c9a84c;font-size:20px;"></i></div>
+        <div style="flex:1;">
+          <div class="t1">Feedback geben</div>
+          <div class="t2">Event, Sessions & App bewerten</div>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--t3);"></i>
+      </div>
+      <div class="info-row" onclick="toast('Zertifikat wird vorbereitet — verfügbar ab 13. Sept.')">
+        <div class="info-row-icon" style="background:var(--pk);"><i class="ti ti-certificate" style="color:var(--pkm);font-size:20px;"></i></div>
+        <div style="flex:1;">
+          <div class="t1">Teilnahmezertifikat</div>
+          <div class="t2">Verfügbar ab 13. September</div>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--t3);"></i>
+      </div>
+      <div style="height:10px;"></div>
+    </div>
+
+    <!-- ════════════════ NOTIFICATIONS ════════════════ -->
+    <div class="screen" id="screen-notifications">
+      <div class="page-header">
+        <div class="page-title">Neuigkeiten</div>
+        <div style="background:var(--pk);border-radius:8px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--pkd);">3 neu</div>
+      </div>
+
+      <div class="notif-item notif-new" style="background:#fdf0f3;border-color:var(--pkb);" onclick="toast('Speaker-Profil: Dr. Jana Weiß geöffnet')">
+        <div class="notif-header">
+          <div class="notif-title" style="color:var(--pkd);">🎤 Neuer Speaker bestätigt</div>
+          <div class="notif-time">Jetzt</div>
+        </div>
+        <div class="notif-body">Dr. Jana Weiß, Forscherin für Biocosmetics, hält die Eröffnungskeynote am 10. Sept.</div>
+      </div>
+
+      <div class="notif-item notif-new" style="background:#faf5eb;border-color:var(--bgb);">
+        <div class="notif-header">
+          <div class="notif-title" style="color:var(--bgd);">⚡ Nur noch 3 Plätze frei</div>
+          <div class="notif-time">2 Std.</div>
+        </div>
+        <div class="notif-body" style="margin-bottom:10px;">Dein gespeicherter Workshop „Scalp Care" ist fast ausgebucht.</div>
+        <div class="notif-actions">
+          <button class="pill-btn pill-pkfill" onclick="toast('Workshop Scalp Care gebucht ✓');event.stopPropagation()">Jetzt buchen</button>
+          <button class="pill-btn" style="background:var(--cr3);color:var(--t2);">Später</button>
+        </div>
+      </div>
+
+      <div class="notif-item notif-new" style="background:var(--wh);" onclick="toast('Online-Check-In geöffnet')">
+        <div class="notif-header">
+          <div class="notif-title">📅 Erinnerung</div>
+          <div class="notif-time">Gestern</div>
+        </div>
+        <div class="notif-body">Noch 42 Tage! Jetzt Online-Check-In abschließen und Programmplanung starten.</div>
+      </div>
+
+      <div class="notif-item" style="background:var(--wh);">
+        <div class="notif-header">
+          <div class="notif-title">🤝 Neue Kontaktanfrage</div>
+          <div class="notif-time">Mo.</div>
+        </div>
+        <div class="notif-body" style="margin-bottom:10px;">Lisa Hartmann (Salon Natura, Stuttgart) möchte sich mit dir vernetzen.</div>
+        <div class="notif-actions">
+          <button class="pill-btn pill-gr" onclick="toast('Lisa Hartmann verbunden ✓');event.stopPropagation()">Annehmen</button>
+          <button class="pill-btn" style="background:var(--cr3);color:var(--t2);">Ablehnen</button>
+        </div>
+      </div>
+
+      <div class="notif-item" style="background:var(--wh);opacity:0.55;">
+        <div class="notif-header">
+          <div class="notif-title">📬 Save the Date</div>
+          <div class="notif-time">20. Jul.</div>
+        </div>
+        <div class="notif-body">BeautyKongress Ulm 2027 — 10.–12. September im Kalender vormerken.</div>
+      </div>
+      <div style="height:10px;"></div>
+    </div>
+
+    <!-- ════════════════ DETAIL OVERLAY ════════════════ -->
+    <div class="overlay" id="overlay">
+      <div class="overlay-handle"></div>
+      <div class="overlay-header">
+        <button class="back-btn" onclick="closeOverlay()"><i class="ti ti-x"></i></button>
+        <div id="overlay-title" style="font-family:var(--font-head);font-size:20px;font-weight:600;color:var(--t1);"></div>
+      </div>
+      <div id="overlay-body" style="padding:0 20px;"></div>
+    </div>
+
+    <!-- ════════════════ FEEDBACK OVERLAY ════════════════ -->
+    <div class="overlay" id="overlay-feedback">
+      <div class="overlay-handle"></div>
+      <div class="overlay-header">
+        <button class="back-btn" onclick="closeFeedback()"><i class="ti ti-x"></i></button>
+        <div style="font-family:var(--font-head);font-size:20px;font-weight:600;color:var(--t1);">Feedback geben</div>
+      </div>
+
+      <div style="padding:0 20px 12px;">
+        <div style="background:var(--cr3);border-radius:10px;height:6px;overflow:hidden;margin-bottom:6px;">
+          <div id="fb-prog" style="height:100%;background:var(--pkm);border-radius:10px;transition:width .3s;width:33%;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);">
+          <span id="fb-sec-name">Gesamterlebnis</span><span id="fb-sec-num">1 / 3</span>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:6px;padding:0 20px 14px;overflow-x:auto;">
+        <div class="floor-tab active" id="fbtab-0" onclick="goFbSec(0)">Gesamterlebnis</div>
+        <div class="floor-tab" id="fbtab-1" onclick="goFbSec(1)">Sessions</div>
+        <div class="floor-tab" id="fbtab-2" onclick="goFbSec(2)">App & UX</div>
+      </div>
+
+      <div id="fb-sec-0" class="fb-section" style="padding:0 20px;">
+        <div class="feedback-section">
+          <div class="feedback-q">Wie zufrieden waren Sie mit dem BeautyKongress 2027 insgesamt?</div>
+          <div class="stars-row" data-q="fb1">
+            <button class="star-btn" data-v="1">★</button><button class="star-btn" data-v="2">★</button><button class="star-btn" data-v="3">★</button><button class="star-btn" data-v="4">★</button><button class="star-btn" data-v="5">★</button>
+          </div>
+          <div class="scale-hint"><span>sehr schlecht</span><span>sehr gut</span></div>
+        </div>
+        <div class="feedback-section">
+          <div class="feedback-q">Wie gut war die Organisation vor Ort?</div>
+          <div class="stars-row" data-q="fb2">
+            <button class="star-btn" data-v="1">★</button><button class="star-btn" data-v="2">★</button><button class="star-btn" data-v="3">★</button><button class="star-btn" data-v="4">★</button><button class="star-btn" data-v="5">★</button>
+          </div>
+          <div class="scale-hint"><span>sehr schlecht</span><span>sehr gut</span></div>
+        </div>
+        <div class="feedback-section">
+          <div class="feedback-q">Würden Sie den Kongress weiterempfehlen?</div>
+          <div class="stars-row" data-q="fb3">
+            <button class="star-btn" data-v="1">★</button><button class="star-btn" data-v="2">★</button><button class="star-btn" data-v="3">★</button><button class="star-btn" data-v="4">★</button><button class="star-btn" data-v="5">★</button>
+          </div>
+          <div class="scale-hint"><span>eher nicht</span><span>auf jeden Fall</span></div>
+        </div>
+      </div>
+
+      <div id="fb-sec-1" class="fb-section" style="display:none;padding:0 20px;">
+        <div class="feedback-section">
+          <div class="feedback-q">Wie bewerten Sie die inhaltliche Qualität der Fachvorträge?</div>
+          <div class="stars-row" data-q="fb4">
+            <button class="star-btn" data-v="1">★</button><button class="star-btn" data-v="2">★</button><button class="star-btn" data-v="3">★</button><button class="star-btn" data-v="4">★</button><button class="star-btn" data-v="5">★</button>
+          </div>
+          <div class="scale-hint"><span>sehr schlecht</span><span>sehr gut</span></div>
+        </div>
+        <div class="feedback-section">
+          <div class="feedback-q">Wie relevant waren die Themen für Ihren Berufsalltag?</div>
+          <div class="stars-row" data-q="fb5">
+            <button class="star-btn" data-v="1">★</button><button class="star-btn" data-v="2">★</button><button class="star-btn" data-v="3">★</button><button class="star-btn" data-v="4">★</button><button class="star-btn" data-v="5">★</button>
+          </div>
+          <div class="scale-hint"><span>nicht relevant</span><span>sehr relevant</span></div>
+        </div>
+      </div>
+
+      <div id="fb-sec-2" class="fb-section" style="display:none;padding:0 20px;">
+        <div class="feedback-section">
+          <div class="feedback-q">Wie einfach war die Anmeldung über die App?</div>
+          <div class="stars-row" data-q="fb6">
+            <button class="star-btn" data-v="1">★</button><button class="star-btn" data-v="2">★</button><button class="star-btn" data-v="3">★</button><button class="star-btn" data-v="4">★</button><button class="star-btn" data-v="5">★</button>
+          </div>
+          <div class="scale-hint"><span>sehr schwierig</span><span>sehr einfach</span></div>
+        </div>
+        <div class="feedback-section">
+          <div class="feedback-q">Wie bewerten Sie Benutzerfreundlichkeit der App?</div>
+          <div class="stars-row" data-q="fb7">
+            <button class="star-btn" data-v="1">★</button><button class="star-btn" data-v="2">★</button><button class="star-btn" data-v="3">★</button><button class="star-btn" data-v="4">★</button><button class="star-btn" data-v="5">★</button>
+          </div>
+          <div class="scale-hint"><span>sehr schlecht</span><span>sehr gut</span></div>
+        </div>
+      </div>
+
+      <div style="padding:20px 20px 30px;display:flex;justify-content:space-between;">
+        <button class="pill-btn" id="fb-back-btn" style="background:var(--cr3);color:var(--t2);visibility:hidden;" onclick="goFbSec(fbCurSec-1)">← Zurück</button>
+        <button class="pill-btn pill-pkfill" id="fb-next-btn" onclick="fbNext()">Weiter →</button>
+      </div>
+    </div>
+
+  </div><!-- screen-wrap -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="goScreen('home')">
+      <i class="ti ti-home"></i><span>Home</span><div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-programm" onclick="goScreen('programm')">
+      <i class="ti ti-calendar"></i><span>Programm</span><div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-halle" onclick="goScreen('halle')">
+      <i class="ti ti-map-2"></i><span>Halle</span><div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-netzwerk" onclick="goScreen('netzwerk')">
+      <i class="ti ti-users"></i><span>Netzwerk</span><div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-profil" onclick="goScreen('profil')">
+      <i class="ti ti-user"></i><span>Profil</span><div class="nav-dot"></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+</div><!-- phone-shell -->
+
+<script>
+  // ── Clock ──
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  }
+  updateClock(); setInterval(updateClock, 10000);
+
+  // ── Countdown to Sept 10, 2027 ──
+  function updateCountdown() {
+    const target = new Date('2027-09-10T08:30:00');
+    const diff = target - new Date();
+    if (diff <= 0) return;
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cnt-d').textContent = d;
+    document.getElementById('cnt-h').textContent = String(h).padStart(2,'0');
+    document.getElementById('cnt-m').textContent = String(m).padStart(2,'0');
+    document.getElementById('cnt-s').textContent = String(s).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown, 1000);
+
+  // ── Navigation ──
+  const screens = ['home','programm','halle','netzwerk','profil'];
+  function goScreen(id) {
+    screens.forEach(s => {
+      document.getElementById('screen-' + s).classList.toggle('active', s === id);
+      document.getElementById('nav-' + s).classList.toggle('active', s === id);
+    });
+    // close overlays
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('overlay-feedback').classList.remove('open');
+  }
+
+  // ── Day selector ──
+  function setDay(idx, el) {
+    document.querySelectorAll('.day-seg-item').forEach((d,i) => d.classList.toggle('active', i === idx));
+    document.querySelectorAll('.day-prog').forEach((d,i) => d.style.display = i === idx ? 'block' : 'none');
+  }
+
+  // ── Floor tabs ──
+  function setFloor(el) {
+    document.querySelectorAll('.floor-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    toast('Etage: ' + el.textContent + ' · Karte wird geladen…');
+  }
+
+  // ── Detail overlay ──
+  const detailData = {
+    keynote: {
+      title: 'Keynote: Zukunft der Naturkosmetik',
+      body: `<div style="background:#f0f7f0;border-radius:14px;padding:16px;margin-bottom:14px;border:0.5px solid #a8cca8;">
+        <div style="font-size:12px;color:#6a9a6a;margin-bottom:4px;">Mittwoch, 10. September · 14:00 – 14:45</div>
+        <div style="font-size:14px;font-weight:600;color:#2a5a2a;margin-bottom:4px;">Saal 1 · Dr. Anna Berger</div>
+        <div style="font-size:12px;color:#5a4a3a;line-height:1.6;">Forschungsinstitut für Naturkosmetik, Berlin. Expertin für pflanzliche Wirkstoffe und nachhaltige Formulierungen.</div>
+      </div>
+      <div style="font-size:13px;color:#5a4a3a;line-height:1.7;margin-bottom:16px;">Diese Keynote gibt einen Überblick über die neuesten Trends und wissenschaftlichen Erkenntnisse im Bereich Naturkosmetik für Haare — von Fermentation bis Bioaktivität.</div>
+      <button onclick="toast('Workshop zu Mein Plan hinzugefügt ✓')" style="width:100%;background:#c47080;color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);">✓ Zu Mein Plan hinzufügen</button>`
+    },
+    workshop: {
+      title: 'Workshop: Pflanzliche Colorationen',
+      body: `<div style="background:#fdf0f3;border-radius:14px;padding:16px;margin-bottom:14px;border:0.5px solid #e8b0be;">
+        <div style="font-size:12px;color:#c47080;margin-bottom:4px;">Mittwoch, 10. September · 16:00 – 18:00</div>
+        <div style="font-size:14px;font-weight:600;color:#8a3a4a;margin-bottom:4px;">Raum B3 · Max. 20 Teilnehmer</div>
+        <div style="margin-top:8px;"><div style="height:5px;border-radius:3px;background:#e0d8cc;overflow:hidden;"><div style="width:85%;height:100%;background:#c47080;border-radius:3px;"></div></div><div style="font-size:12px;color:#c47080;margin-top:4px;font-weight:600;">Nur noch 3 Plätze frei!</div></div>
+      </div>
+      <div style="font-size:13px;color:#5a4a3a;line-height:1.7;margin-bottom:16px;">Praxisworkshop zu pflanzlichen Haarfarben: Anwendungstechniken, Mischverhältnisse, Haltbarkeit und Beratungskompetenz für den Salonalltag.</div>
+      <button onclick="toast('Buchung bestätigt ✓ — Bestätigungsmail folgt')" style="width:100%;background:#c47080;color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);">Jetzt verbindlich buchen</button>`
+    },
+    party: {
+      title: 'Messeparty & Get-Together',
+      body: `<div style="background:#faf5eb;border-radius:14px;padding:16px;margin-bottom:14px;border:0.5px solid #d4b880;">
+        <div style="font-size:12px;color:#b08848;margin-bottom:4px;">Mittwoch, 10. September · ab 18:00</div>
+        <div style="font-size:14px;font-weight:600;color:#6a4a18;margin-bottom:4px;">Foyer · Alle Teilnehmenden eingeladen</div>
+      </div>
+      <div style="font-size:13px;color:#5a4a3a;line-height:1.7;margin-bottom:16px;">Lockeres Networking bei Snacks und Getränken. Der Messebereich bleibt geöffnet — ideale Gelegenheit, Aussteller persönlich kennenzulernen und neue Kontakte zu knüpfen.</div>
+      <button onclick="toast('Erinnerung gesetzt für 17:45 Uhr ✓')" style="width:100%;background:#b08848;color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);">Erinnerung setzen</button>`
+    },
+    scalp: {
+      title: 'Workshop: Scalp Care',
+      body: `<div style="background:#fdf0f3;border-radius:14px;padding:16px;margin-bottom:14px;border:0.5px solid #e8b0be;">
+        <div style="font-size:12px;color:#c47080;margin-bottom:4px;">Donnerstag, 11. September · 11:00 – 13:00</div>
+        <div style="font-size:14px;font-weight:600;color:#8a3a4a;">Raum C2 · M. Schäfer <span style="color:#c47080;">· Mein Plan ✓</span></div>
+      </div>
+      <div style="font-size:13px;color:#5a4a3a;line-height:1.7;margin-bottom:16px;">Diagnose und Pflege von Kopfhautproblemen mit natürlichen Produkten. Praxisübungen mit Diagnose-Tools und Pflegeplänen.</div>
+      <button onclick="toast('Session entfernt aus Mein Plan')" style="width:100%;background:#f9d6df;color:#8a3a4a;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);">Aus Mein Plan entfernen</button>`,
+    },
+    start: {
+      title: 'Startveranstaltung',
+      body: `<div style="background:#fdf0f3;border-radius:14px;padding:16px;margin-bottom:14px;border:0.5px solid #e8b0be;">
+        <div style="font-size:12px;color:#c47080;margin-bottom:4px;">Mittwoch, 10. September · 10:00 – 12:00</div>
+        <div style="font-size:14px;font-weight:600;color:#8a3a4a;">Saal 1 · Alle Teilnehmenden</div>
+      </div>
+      <div style="font-size:13px;color:#5a4a3a;line-height:1.7;margin-bottom:16px;">Offizielle Eröffnung des BeautyKongress 2027. Begrüßungsrede, Vorstellung des Programms und erste Keynote.</div>`
+    }
+  };
+
+  function showDetail(id) {
+    const d = detailData[id]; if (!d) return;
+    document.getElementById('overlay-title').textContent = d.title;
+    document.getElementById('overlay-body').innerHTML = d.body;
+    document.getElementById('overlay').classList.add('open');
+  }
+  function closeOverlay() { document.getElementById('overlay').classList.remove('open'); }
+
+  // ── Feedback overlay ──
+  let fbCurSec = 0;
+  const fbSecNames = ['Gesamterlebnis','Sessions & Workshops','App & UX'];
+  const fbSecPcts = ['33%','67%','100%'];
+
+  function showFeedback() {
+    document.getElementById('overlay-feedback').classList.add('open');
+    goFbSec(0);
+  }
+  function closeFeedback() { document.getElementById('overlay-feedback').classList.remove('open'); }
+
+  function goFbSec(idx) {
+    if (idx < 0 || idx > 2) return;
+    fbCurSec = idx;
+    document.querySelectorAll('.fb-section').forEach((s,i) => s.style.display = i === idx ? 'block' : 'none');
+    document.querySelectorAll('[id^="fbtab-"]').forEach((t,i) => t.classList.toggle('active', i === idx));
+    document.getElementById('fb-prog').style.width = fbSecPcts[idx];
+    document.getElementById('fb-sec-name').textContent = fbSecNames[idx];
+    document.getElementById('fb-sec-num').textContent = (idx+1) + ' / 3';
+    document.getElementById('fb-back-btn').style.visibility = idx === 0 ? 'hidden' : 'visible';
+    document.getElementById('fb-next-btn').textContent = idx === 2 ? 'Absenden ✓' : 'Weiter →';
+  }
+  function fbNext() {
+    if (fbCurSec < 2) goFbSec(fbCurSec + 1);
+    else { closeFeedback(); toast('Vielen Dank für Ihr Feedback! 🌿'); }
+  }
+
+  // Star ratings
+  document.querySelectorAll('.stars-row').forEach(row => {
+    const btns = row.querySelectorAll('.star-btn');
+    let rating = 0;
+    btns.forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        rating = i + 1;
+        btns.forEach((b, j) => b.classList.toggle('lit', j < rating));
+      });
+      btn.addEventListener('mouseenter', () => {
+        btns.forEach((b, j) => b.classList.toggle('lit', j <= i));
+      });
+      btn.addEventListener('mouseleave', () => {
+        btns.forEach((b, j) => b.classList.toggle('lit', j < rating));
+      });
+    });
+  });
+
+  // ── Contact search ──
+  function filterContacts(val) {
+    document.querySelectorAll('#contacts-list .row-item').forEach(item => {
+      const name = item.querySelector('.t1').textContent.toLowerCase();
+      item.style.display = name.includes(val.toLowerCase()) ? 'flex' : 'none';
+    });
+  }
+
+  // ── Toast ──
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+  }
+
+  // ── Swipe to go back on overlay ──
+  ['overlay','overlay-feedback'].forEach(id => {
+    const el = document.getElementById(id);
+    let startY = 0;
+    el.addEventListener('touchstart', e => startY = e.touches[0].clientY, {passive:true});
+    el.addEventListener('touchend', e => {
+      if (e.changedTouches[0].clientY - startY > 80) {
+        el.classList.remove('open');
+      }
+    }, {passive:true});
+  });
+</script>
+
+</body>
+</html>
